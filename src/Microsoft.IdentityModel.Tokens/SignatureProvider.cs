@@ -156,5 +156,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a bool indicating if this <see cref="SignatureProvider"/> is expected to create signatures.
         /// </summary>
         public bool WillCreateSignatures { get; protected set; }
+
+        internal bool WasCached { get; set; }
     }
 }
