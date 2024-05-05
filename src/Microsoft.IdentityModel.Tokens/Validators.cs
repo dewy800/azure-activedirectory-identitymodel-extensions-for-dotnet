@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// AudienceValidator
     /// </summary>
-    public static class Validators
+    public static partial class Validators
     {
         /// <summary>
         /// Validates if a given algorithm for a <see cref="SecurityKey"/> is valid.
@@ -219,7 +219,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>An EXACT match is required.</remarks>
         internal static string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            ValueTask<string> vt = ValidateIssuerAsync(issuer, securityToken, validationParameters, configuration);
+            ValueTask<string> vt = ValidateIssuerInternalAsync(issuer, securityToken, validationParameters, configuration);
             return vt.IsCompletedSuccessfully ?
                 vt.Result :
                 vt.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
@@ -239,7 +239,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenInvalidIssuerException">If <see cref="TokenValidationParameters.ValidIssuer"/> is null or whitespace and <see cref="TokenValidationParameters.ValidIssuers"/> is null and <see cref="BaseConfiguration.Issuer"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">If 'issuer' failed to matched either <see cref="TokenValidationParameters.ValidIssuer"/> or one of <see cref="TokenValidationParameters.ValidIssuers"/> or <see cref="BaseConfiguration.Issuer"/>.</exception>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static async ValueTask<string> ValidateIssuerAsync(
+        internal static async ValueTask<string> ValidateIssuerInternalAsync(
             string issuer,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters,

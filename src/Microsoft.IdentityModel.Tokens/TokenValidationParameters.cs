@@ -191,6 +191,7 @@ namespace Microsoft.IdentityModel.Tokens
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
+        private IssuerValidator80Async _issuerValidatorAsync = Validators.ValidateIssuerAsync;
 
         /// <summary>
         /// This is the default value of <see cref="ClaimsIdentity.AuthenticationType"/> when creating a <see cref="ClaimsIdentity"/>.
@@ -209,7 +210,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Default for the maximum token size.
         /// </summary>
         /// <remarks>250 KB (kilobytes).</remarks>
-        public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 250;
+        public const int DefaultMaximumTokenSizeInBytes = 1024 * 250;
 
         /// <summary>
         /// Copy constructor for <see cref="TokenValidationParameters"/>.
@@ -236,7 +237,7 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerSigningKeyValidatorUsingConfiguration = other.IssuerSigningKeyValidatorUsingConfiguration;
             IssuerValidator = other.IssuerValidator;
-            IssuerValidatorAsync = other.IssuerValidatorAsync;
+            IssuerValidator80Async = other.IssuerValidator80Async;
             IssuerValidatorUsingConfiguration = other.IssuerValidatorUsingConfiguration;
             LifetimeValidator = other.LifetimeValidator;
             LogTokenId = other.LogTokenId;
@@ -302,6 +303,31 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets <see cref="TokenValidationParameters"/>.
         /// </summary>
         public TokenValidationParameters ActorValidationParameters { get; set; }
+
+        #region Async Validators
+        /// <summary>
+        /// Gets or sets a delegate that will be used to validate the issuer of the token.
+        /// </summary>
+        public IssuerValidator80Async IssuerValidator80Async
+        {
+            get
+            {
+                return _issuerValidatorAsync;
+            }
+            set
+            {
+                _issuerValidatorAsync = value ?? throw new ArgumentNullException(nameof(value));
+            }
+        }
+
+        internal bool DeferLogging { get; set; }
+
+        #endregion
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to validate the issuer of the token.
+        /// </summary>
+        internal IssuerValidatorAsync IssuerValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate used to validate the cryptographic algorithm used.
@@ -538,18 +564,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// priority. 
         /// </remarks>
         public IssuerValidator IssuerValidator { get; set; }
-
-
-        /// <summary>
-        /// Gets or sets a delegate that will be used to validate the issuer of the token.
-        /// </summary>
-        /// <remarks>
-        /// If set, this delegate will be called to validate the 'issuer' of the token, instead of default processing.
-        /// This means that no default 'issuer' validation will occur.
-        /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
-        /// IssuerValidatorAsync takes precedence over <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/>.
-        /// </remarks>
-        internal IssuerValidatorAsync IssuerValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.

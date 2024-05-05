@@ -1669,7 +1669,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             Tokens.Validators.ValidateLifetime(notBefore, expires, jsonWebToken, validationParameters);
             Tokens.Validators.ValidateAudience(jsonWebToken.Audiences, jsonWebToken, validationParameters);
-            string issuer = await Tokens.Validators.ValidateIssuerAsync(jsonWebToken.Issuer, jsonWebToken, validationParameters, configuration).ConfigureAwait(false);
+            IssuerValidationResult issuerValidationResult = await Tokens.Validators.ValidateIssuerAsync(jsonWebToken.Issuer, jsonWebToken, validationParameters, configuration).ConfigureAwait(false);
 
             Tokens.Validators.ValidateTokenReplay(expires, jsonWebToken.EncodedToken, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
@@ -1688,7 +1688,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
 
             string tokenType = Tokens.Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
-            return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer)
+            return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuerValidationResult.Issuer)
             {
                 IsValid = true,
                 TokenType = tokenType

@@ -14,14 +14,10 @@ namespace Microsoft.IdentityModel.Tokens
     /// Contains artifacts obtained when a SecurityToken is validated.
     /// A SecurityTokenHandler returns an instance that captures the results of validating a token.
     /// </summary>
-    public class TokenValidationResult
+    public class TokenValidationResult : ValidationResult
     {
         private readonly TokenValidationParameters _validationParameters;
         private readonly TokenHandler _tokenHandler;
-
-        private Exception _exception;
-        private bool _hasIsValidOrExceptionBeenRead = false;
-        private bool _isValid = false;
 
         // Fields lazily initialized in a thread-safe manner. _claimsIdentity is protected by the _claimsIdentitySyncObj
         // lock, and since null is a valid initialized value, _claimsIdentityInitialized tracks whether or not it's valid.
@@ -37,6 +33,7 @@ namespace Microsoft.IdentityModel.Tokens
         private ClaimsIdentity _claimsIdentity;
         private Dictionary<string, object> _claims;
         private Dictionary<string, object> _propertyBag;
+        private List<ValidationResult> _validationResults;
 
         /// <summary>
         /// Creates an instance of <see cref="TokenValidationResult"/>
@@ -67,7 +64,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                if (!_hasIsValidOrExceptionBeenRead)
+                if (HasValidOrExceptionWasRead)
                     LogHelper.LogWarning(LogMessages.IDX10109);
 
                 if (_claims is null && ClaimsIdentity is { } ci)
@@ -156,41 +153,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Exception"/> that occurred during validation.
-        /// </summary>
-        public Exception Exception
-        {
-            get
-            {
-                _hasIsValidOrExceptionBeenRead = true;
-                return _exception;
-            }
-            set
-            {
-                _exception = value;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the issuer that was found in the token.
         /// </summary>
         public string Issuer { get; set; }
-
-        /// <summary>
-        /// True if the token was successfully validated, false otherwise.
-        /// </summary>
-        public bool IsValid
-        {
-            get
-            {
-                _hasIsValidOrExceptionBeenRead = true;
-                return _isValid;
-            }
-            set
-            {
-                _isValid = value;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs. This allows addition of data that could be used in custom scenarios. This uses <see cref="StringComparer.Ordinal"/> for case-sensitive comparison of keys.
@@ -228,5 +193,37 @@ namespace Microsoft.IdentityModel.Tokens
         /// (e.g for a JSON Web Token, from the "typ" header). 
         /// </summary>
         public string TokenType { get; set; }
+
+        /// <summary>
+        /// Gets the list of <see cref="ValidationResult"/> that contains the result of validating the token.
+        /// </summary>
+        public IList<ValidationResult> ValidationResults
+        {
+            get
+            {
+                if (_validationResults is null)
+                    Interlocked.CompareExchange(ref _validationResults, new List<ValidationResult>(), null);
+
+                return _validationResults;
+            }
+        }
+
+        /// <summary>
+        /// TODO - need to create AggregateException if more than one exception is in ValidatonResults.
+        /// </summary>
+        public override Exception Exception
+        {
+            get; set;
+            //{
+            //    if (HasValidOrExceptionWasRead)
+            //        LogHelper.LogWarning(LogMessages.IDX10109);
+
+            //    if (ExceptionDetails != null)
+            //        return ExceptionDetails.GetException();
+
+            //    return null;
+            //}
+            //{ }
+        }
     }
 }

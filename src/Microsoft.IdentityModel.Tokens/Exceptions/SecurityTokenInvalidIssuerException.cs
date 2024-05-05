@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -17,6 +19,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         [NonSerialized]
         const string _InvalidIssuerKey = _Prefix + nameof(InvalidIssuer);
+
+        [NonSerialized]
+        private string _stackTrace;
 
         /// <summary>
         /// Gets or sets the InvalidIssuer that created the validation exception.
@@ -75,6 +80,49 @@ namespace Microsoft.IdentityModel.Tokens
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the stack trace that is captured when the exception is created.
+        /// </summary>
+        public override string StackTrace
+        {
+            get
+            {
+                if (_stackTrace == null)
+                {
+                    if (ExceptionDetails == null)
+                        return base.StackTrace;
+#if NET8_0_OR_GREATER
+                    _stackTrace = new StackTrace(ExceptionDetails.StackFrames).ToString();
+#else
+                    StringBuilder sb = new();
+                    foreach (StackFrame frame in ExceptionDetails.StackFrames)
+                    {
+                        sb.Append(frame.ToString());
+                        sb.Append(Environment.NewLine);
+                    }
+
+                    _stackTrace = sb.ToString();
+#endif
+                }
+
+                return _stackTrace;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the source of the exception.
+        /// </summary>
+        public override string Source
+        {
+            get => base.Source;
+            set => base.Source = value;
+        }
+
+        internal ExceptionDetails ExceptionDetails
+        {
+            get; set;
         }
 
         /// <inheritdoc/>

@@ -291,7 +291,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.IssuerSigningKeyValidator = ValidationDelegates.IssuerSigningKeyValidator;
             validationParameters.IssuerSigningKeyValidatorUsingConfiguration = ValidationDelegates.IssuerSigningKeyValidatorUsingConfiguration;
             validationParameters.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
-            validationParameters.IssuerValidatorAsync = ValidationDelegates.IssuerValidatorAsync;
+            validationParameters.IssuerValidatorAsync = ValidationDelegates.IssuerValidatorInternalAsync;
             validationParameters.IssuerValidatorUsingConfiguration = ValidationDelegates.IssuerValidatorUsingConfigEcho;
             validationParameters.LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue;
             validationParameters.NameClaimTypeRetriever = ValidationDelegates.NameClaimTypeRetriever;
